@@ -56,12 +56,10 @@ export class AppointmentsController {
   ) {
     // Patients can only create appointments for themselves
     if (currentUser.role === UserRole.PATIENT && currentUser.id !== createDto.patientId) {
-      // Forbidden: patient trying to book for another patient
-      // We'll let the service handle it by passing the current user
-      return this.appointmentsService.createAppointment(createDto, currentUser);
+      throw new ForbiddenException('Patients can only create appointments for themselves');
     }
     // Admin can create for any patient
-    return this.appointmentsService.createAppointment(createDt, currentUser);
+    return this.appointmentsService.createAppointment(createDto, currentUser);
   }
 
   // PATCH /appointments/:id - Update an appointment
