@@ -13,13 +13,10 @@ exports.CreateAmbulanceDto = void 0;
 const class_validator_1 = require("class-validator");
 const ambulance_entity_1 = require("../entities/ambulance.entity");
 class CreateAmbulanceDto {
-    licensePlate;
-    type;
-    hospitalId;
-    status = ambulance_entity_1.AmbulanceStatus.AVAILABLE;
-    lastLatitude;
-    lastLongitude;
-    isActive = true;
+    constructor() {
+        this.status = ambulance_entity_1.AmbulanceStatus.AVAILABLE;
+        this.isActive = true;
+    }
 }
 exports.CreateAmbulanceDto = CreateAmbulanceDto;
 __decorate([

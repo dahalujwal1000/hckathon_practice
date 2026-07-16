@@ -1,3 +1,4 @@
+import { Appointment } from '../../appointments/entities/appointment.entity';
 import { Doctor } from '../../doctors/entities/doctor.entity';
 export declare enum HospitalType {
     GOVERNMENT = "government",
@@ -19,6 +20,7 @@ export declare class Hospital {
     isActive: boolean;
     doctors: Doctor[];
     ambulances: Ambulance[];
+    appointments: Appointment[];
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;

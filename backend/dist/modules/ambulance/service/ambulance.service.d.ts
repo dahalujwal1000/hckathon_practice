@@ -1,4 +1,4 @@
-import { AmbulanceRepository } from './repository/ambulance.repository';
+import { AmbulanceRepository } from '../repository/ambulance.repository';
 import { Ambulance } from '../entities/ambulance.entity';
 import { CreateAmbulanceDto } from '../dto/create-ambulance.dto';
 import { UpdateAmbulanceDto } from '../dto/update-ambulance.dto';

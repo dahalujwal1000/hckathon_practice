@@ -18,7 +18,6 @@ const typeorm_1 = require("@nestjs/typeorm");
 const typeorm_2 = require("typeorm");
 const ambulance_entity_1 = require("../entities/ambulance.entity");
 let AmbulanceRepository = class AmbulanceRepository {
-    repository;
     constructor(repository) {
         this.repository = repository;
     }
@@ -35,7 +34,7 @@ let AmbulanceRepository = class AmbulanceRepository {
             qb.andWhere('ambulance.status = :status', { status });
         }
         if (hospitalId) {
-            qb.andWhere('ambulance.hospitalId = :hospitalId', { hospitalId });
+            qb.andWhere('ambulance.baseHospitalId = :hospitalId', { hospitalId });
         }
         const [data, total] = await qb
             .orderBy('ambulance.createdAt', 'DESC')
@@ -60,7 +59,7 @@ let AmbulanceRepository = class AmbulanceRepository {
         await this.repository.softDelete({ id });
     }
     async findByHospitalId(hospitalId) {
-        return this.repository.find({ where: { hospitalId } });
+        return this.repository.find({ where: { baseHospital: { id: hospitalId } } });
     }
     async findNearby(latitude, longitude, radiusKm) {
         const earthRadiusKm = 6371;

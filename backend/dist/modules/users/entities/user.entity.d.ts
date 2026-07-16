@@ -1,3 +1,4 @@
+import { Appointment } from '../../appointments/entities/appointment.entity';
 export declare enum UserRole {
     PATIENT = "patient",
     DOCTOR = "doctor",
@@ -17,4 +18,5 @@ export declare class User {
     updatedAt: Date;
     deletedAt: Date;
     password: string;
+    appointments: Appointment[];
 }

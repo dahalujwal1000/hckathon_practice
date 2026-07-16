@@ -54,4 +54,8 @@ export class Doctor {
 
   @DeleteDateColumn()
   deletedAt: Date;
+
+  // Relationship to appointments
+  @OneToMany(() => Appointment, appointment => appointment.doctor)
+  appointments: Appointment[];
 }

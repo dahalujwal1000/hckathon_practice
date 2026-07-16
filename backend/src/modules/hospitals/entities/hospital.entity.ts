@@ -8,6 +8,7 @@ import {
   OneToMany,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
+import { Appointment } from '../../appointments/entities/appointment.entity';
 import { Doctor } from '../../doctors/entities/doctor.entity';
 
 export enum HospitalType {
@@ -57,6 +58,10 @@ export class Hospital {
 
     @OneToMany(() => Ambulance, ambulance => ambulance.baseHospital)
     ambulances: Ambulance[];
+
+  // Relationship to appointments
+  @OneToMany(() => Appointment, appointment => appointment.hospital)
+  appointments: Appointment[];
 
   @CreateDateColumn()
   createdAt: Date;

@@ -14,7 +14,6 @@ exports.DoctorsService = void 0;
 const common_1 = require("@nestjs/common");
 const doctors_repository_1 = require("./repository/doctors.repository");
 let DoctorsService = class DoctorsService {
-    doctorsRepository;
     constructor(doctorsRepository) {
         this.doctorsRepository = doctorsRepository;
     }

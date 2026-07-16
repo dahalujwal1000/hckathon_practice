@@ -11,20 +11,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
-var _a, _b, _c, _d;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AmbulanceController = void 0;
 const common_1 = require("@nestjs/common");
-const ambulance_service_1 = require("./service/ambulance.service");
-const create_ambulance_dto_1 = require("./dto/create-ambulance.dto");
-const update_ambulance_dto_1 = require("./dto/update-ambulance.dto");
-const query_ambulance_dto_1 = require("./dto/query-ambulance.dto");
+const ambulance_service_1 = require("../service/ambulance.service");
+const create_ambulance_dto_1 = require("../dto/create-ambulance.dto");
+const update_ambulance_dto_1 = require("../dto/update-ambulance.dto");
+const query_ambulance_dto_1 = require("../dto/query-ambulance.dto");
 const jwt_auth_guard_1 = require("../../common/guards/jwt-auth.guard");
 const roles_guard_1 = require("../../common/guards/roles.guard");
 const roles_decorator_1 = require("../../common/decorators/roles.decorator");
 const user_entity_1 = require("../../users/entities/user.entity");
 let AmbulanceController = class AmbulanceController {
-    ambulanceService;
     constructor(ambulanceService) {
         this.ambulanceService = ambulanceService;
     }
@@ -64,7 +62,7 @@ __decorate([
     (0, common_1.Get)(),
     __param(0, (0, common_1.Query)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_b = typeof query_ambulance_dto_1.QueryAmbulanceDto !== "undefined" && query_ambulance_dto_1.QueryAmbulanceDto) === "function" ? _b : Object]),
+    __metadata("design:paramtypes", [query_ambulance_dto_1.QueryAmbulanceDto]),
     __metadata("design:returntype", Promise)
 ], AmbulanceController.prototype, "getAmbulances", null);
 __decorate([
@@ -96,7 +94,7 @@ __decorate([
     (0, common_1.UsePipes)(new common_1.ValidationPipe({ whitelist: true, transform: true })),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [typeof (_c = typeof create_ambulance_dto_1.CreateAmbulanceDto !== "undefined" && create_ambulance_dto_1.CreateAmbulanceDto) === "function" ? _c : Object]),
+    __metadata("design:paramtypes", [create_ambulance_dto_1.CreateAmbulanceDto]),
     __metadata("design:returntype", Promise)
 ], AmbulanceController.prototype, "createAmbulance", null);
 __decorate([
@@ -106,7 +104,7 @@ __decorate([
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String, typeof (_d = typeof update_ambulance_dto_1.UpdateAmbulanceDto !== "undefined" && update_ambulance_dto_1.UpdateAmbulanceDto) === "function" ? _d : Object]),
+    __metadata("design:paramtypes", [String, update_ambulance_dto_1.UpdateAmbulanceDto]),
     __metadata("design:returntype", Promise)
 ], AmbulanceController.prototype, "updateAmbulance", null);
 __decorate([
@@ -120,6 +118,6 @@ __decorate([
 exports.AmbulanceController = AmbulanceController = __decorate([
     (0, common_1.Controller)('ambulances'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
-    __metadata("design:paramtypes", [typeof (_a = typeof ambulance_service_1.AmbulanceService !== "undefined" && ambulance_service_1.AmbulanceService) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [ambulance_service_1.AmbulanceService])
 ], AmbulanceController);
 //# sourceMappingURL=ambulance.controller.js.map

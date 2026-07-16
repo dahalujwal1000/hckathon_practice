@@ -15,8 +15,6 @@ const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
 const operators_1 = require("rxjs/operators");
 let AiHttpService = class AiHttpService {
-    httpService;
-    configService;
     constructor(httpService, configService) {
         this.httpService = httpService;
         this.configService = configService;

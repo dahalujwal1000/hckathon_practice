@@ -17,8 +17,6 @@ const passport_google_oauth20_1 = require("passport-google-oauth20");
 const config_1 = require("@nestjs/config");
 const auth_service_1 = require("./auth.service");
 let GoogleStrategy = class GoogleStrategy extends (0, passport_2.PassportStrategy)(passport_google_oauth20_1.Strategy, 'google') {
-    configService;
-    authService;
     constructor(configService, authService) {
         super({
             clientID: configService.get('GOOGLE_CLIENT_ID'),

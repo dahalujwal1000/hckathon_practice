@@ -1,0 +1,30 @@
+import { AppointmentsRepository } from './repository/appointments.repository';
+import { Appointment } from './entities/appointment.entity';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
+import { QueryAppointmentDto } from './dto/query-appointment.dto';
+import { User } from '../../users/entities/user.entity';
+import { DoctorsRepository } from '../../doctors/repository/doctors.repository';
+import { HospitalsRepository } from '../../hospitals/repository/hospitals.repository';
+import { UsersRepository } from '../../users/repository/users.repository';
+import { EmailService } from '../../../shared/services/email.service';
+export declare class AppointmentsService {
+    private readonly appointmentsRepository;
+    private readonly doctorsRepository;
+    private readonly hospitalsRepository;
+    private readonly usersRepository;
+    private readonly emailService;
+    constructor(appointmentsRepository: AppointmentsRepository, doctorsRepository: DoctorsRepository, hospitalsRepository: HospitalsRepository, usersRepository: UsersRepository, emailService: EmailService);
+    getAppointments(queryDto: QueryAppointmentDto, currentUser: User): Promise<[Appointment[], number]>;
+    getAppointmentById(id: string, currentUser: User): Promise<Appointment>;
+    createAppointment(createDto: CreateAppointmentDto, currentUser: User): Promise<Appointment>;
+    updateAppointment(id: string, updateDto: UpdateAppointmentDto, currentUser: User): Promise<Appointment>;
+    cancelAppointment(id: string, currentUser: User): Promise<void>;
+    getAppointmentsByPatient(patientId: string, currentUser: User): Promise<Appointment[]>;
+    getAppointmentsByDoctor(doctorId: string, currentUser: User): Promise<Appointment[]>;
+    getAppointmentsByHospital(hospitalId: string, currentUser: User): Promise<Appointment[]>;
+    private validatePatient;
+    private validateDoctor;
+    private validateHospital;
+    private isDoctorForDoctorId;
+}

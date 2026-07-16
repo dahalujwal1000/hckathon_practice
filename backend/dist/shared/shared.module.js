@@ -9,13 +9,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SharedModule = void 0;
 const common_1 = require("@nestjs/common");
 const aiService_1 = require("./services/aiService");
+const email_service_1 = require("./services/email.service");
 let SharedModule = class SharedModule {
 };
 exports.SharedModule = SharedModule;
 exports.SharedModule = SharedModule = __decorate([
     (0, common_1.Module)({
-        providers: [aiService_1.AiHttpService],
-        exports: [aiService_1.AiHttpService],
+        providers: [aiService_1.AiHttpService, email_service_1.EmailService],
+        exports: [aiService_1.AiHttpService, email_service_1.EmailService],
     })
 ], SharedModule);
 //# sourceMappingURL=shared.module.js.map

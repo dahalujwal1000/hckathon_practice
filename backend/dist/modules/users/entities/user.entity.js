@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.User = exports.UserRole = void 0;
 const typeorm_1 = require("typeorm");
 const class_transformer_1 = require("class-transformer");
+const appointment_entity_1 = require("../../appointments/entities/appointment.entity");
 var UserRole;
 (function (UserRole) {
     UserRole["PATIENT"] = "patient";
@@ -19,19 +20,6 @@ var UserRole;
     UserRole["ADMIN"] = "admin";
 })(UserRole || (exports.UserRole = UserRole = {}));
 let User = class User {
-    id;
-    email;
-    name;
-    avatarUrl;
-    role;
-    provider;
-    providerId;
-    isActive;
-    lastLoginAt;
-    createdAt;
-    updatedAt;
-    deletedAt;
-    password;
 };
 exports.User = User;
 __decorate([
@@ -88,8 +76,13 @@ __decorate([
 ], User.prototype, "deletedAt", void 0);
 __decorate([
     (0, class_transformer_1.Exclude)(),
+    (0, typeorm_1.Column)({ nullable: true }),
     __metadata("design:type", String)
 ], User.prototype, "password", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => appointment_entity_1.Appointment, appointment => appointment.patient),
+    __metadata("design:type", Array)
+], User.prototype, "appointments", void 0);
 exports.User = User = __decorate([
     (0, typeorm_1.Entity)('users')
 ], User);

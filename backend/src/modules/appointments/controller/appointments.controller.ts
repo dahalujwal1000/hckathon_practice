@@ -1,3 +1,4 @@
+import { ForbiddenException } from '@nestjs/common';
 import {
   Controller,
   Get,
@@ -9,15 +10,15 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { AppointmentsService } from './service/appointments.service';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto';
-import { QueryAppointmentDto } from './dto/query-appointment.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { AppointmentsService } from '../service/appointments.service';
+import { CreateAppointmentDto } from '../dto/create-appointment.dto';
+import { UpdateAppointmentDto } from '../dto/update-appointment.dto';
+import { QueryAppointmentDto } from '../dto/query-appointment.dto';
+import { JwtAuthGuard } from 'common/guards/jwt-auth.guard';
+import { RolesGuard } from 'common/guards/roles.guard';
+import { Roles } from 'common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
-import { CurrentUser } from '../../common/decorators/current-user.decorator';
+import { CurrentUser } from 'common/decorators/current-user.decorator';
 import { User } from '../../users/entities/user.entity';
 
 @Controller('appointments')
@@ -91,13 +92,6 @@ export class AppointmentsController {
     @Param('patientId') patientId: string,
     @CurrentUser() currentUser: User,
   ) {
-    // Patients can only view their own appointments
-    if (currentUser.role === UserRole.PATIENT && currentUser.id !== patientId) {
-      // Forbidden
-      // We'll let the service handle it
-      return this.appointmentsService.getAppointmentsByPatient(patientId, currentUser);
-    }
-    // Doctor or admin can view any patient's appointments
     return this.appointmentsService.getAppointmentsByPatient(patientId, currentUser);
   }
 
@@ -107,13 +101,6 @@ export class AppointmentsController {
     @Param('doctorId') doctorId: string,
     @CurrentUser() currentUser: User,
   ) {
-    // Doctors can only view their own appointments
-    if (currentUser.role === UserRole.DOCTOR && currentUser.id !== doctorId) {
-      // Forbidden
-      return this.appointmentsService.getAppointmentsByDoctor(doctorId, currentUser);
-    }
-    // Patient (if they are the patient in the appointment?) Actually, a patient might want to see their appointments with a specific doctor? That's covered by the patient endpoint.
-    // Admin can view any doctor's appointments
     return this.appointmentsService.getAppointmentsByDoctor(doctorId, currentUser);
   }
 
@@ -123,8 +110,6 @@ export class AppointmentsController {
     @Param('hospitalId') hospitalId: string,
     @CurrentUser() currentUser: User,
   ) {
-    // Only admin can view all appointments for a hospital? Or maybe doctors and patients can see theirs?
-    // We'll allow admin and maybe the users associated? For simplicity, we'll allow admin and let the service handle.
     return this.appointmentsService.getAppointmentsByHospital(hospitalId, currentUser);
   }
 }

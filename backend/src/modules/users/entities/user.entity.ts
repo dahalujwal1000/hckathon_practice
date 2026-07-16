@@ -5,8 +5,10 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Appointment } from '../../appointments/entities/appointment.entity';
 
 export enum UserRole {
   PATIENT = 'patient',
@@ -60,4 +62,8 @@ export class User {
   @Exclude()
   @Column({ nullable: true })
   password: string;
+
+  // Relationship to appointments
+  @OneToMany(() => Appointment, appointment => appointment.patient)
+  appointments: Appointment[];
 }

@@ -1,25 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common/pipes/validation.pipe';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { ResponseInterceptor } from './common/interceptors/response.interceptor';
 import { ValidationExceptionPipe } from './common/pipes/validation-exception.pipe';
 
+// Import reflect-metadata for TypeORM decorators
+import 'reflect-metadata';
+
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // Global validation pipe
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    transform: true,
-    forbidNonWhitelisted: true,
-    transformOptions: {
-      enableImplicitConversion: true,
-    },
-  }));
+  app.useGlobalPipes(new ValidationExceptionPipe());
 
-  // Global exception filter+
+  // Global exception filter
   app.useGlobalFilters(new GlobalExceptionFilter());
 
   // Global response interceptor

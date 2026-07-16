@@ -13,4 +13,5 @@ export declare class Doctor {
     createdAt: Date;
     updatedAt: Date;
     deletedAt: Date;
+    appointments: Appointment[];
 }

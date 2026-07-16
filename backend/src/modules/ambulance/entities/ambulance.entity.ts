@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Exclude, Expose } from 'class-transformer';
-import { Hospital } from '../hospitals/entities/hospital.entity';
+import { Hospital } from '../../hospitals/entities/hospital.entity';
 
 export enum AmbulanceType {
   GROUND = 'ground',

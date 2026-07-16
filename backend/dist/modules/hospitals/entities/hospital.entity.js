@@ -11,6 +11,7 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Hospital = exports.HospitalType = void 0;
 const typeorm_1 = require("typeorm");
+const appointment_entity_1 = require("../../appointments/entities/appointment.entity");
 const doctor_entity_1 = require("../../doctors/entities/doctor.entity");
 var HospitalType;
 (function (HospitalType) {
@@ -20,22 +21,6 @@ var HospitalType;
     HospitalType["COMMUNITY"] = "community";
 })(HospitalType || (exports.HospitalType = HospitalType = {}));
 let Hospital = class Hospital {
-    id;
-    name;
-    address;
-    latitude;
-    longitude;
-    phone;
-    website;
-    type;
-    rating;
-    establishedYear;
-    isActive;
-    doctors;
-    ambulances;
-    createdAt;
-    updatedAt;
-    deletedAt;
 };
 exports.Hospital = Hospital;
 __decorate([
@@ -90,6 +75,10 @@ __decorate([
     (0, typeorm_1.OneToMany)(() => Ambulance, ambulance => ambulance.baseHospital),
     __metadata("design:type", Array)
 ], Hospital.prototype, "ambulances", void 0);
+__decorate([
+    (0, typeorm_1.OneToMany)(() => appointment_entity_1.Appointment, appointment => appointment.hospital),
+    __metadata("design:type", Array)
+], Hospital.prototype, "appointments", void 0);
 __decorate([
     (0, typeorm_1.CreateDateColumn)(),
     __metadata("design:type", Date)

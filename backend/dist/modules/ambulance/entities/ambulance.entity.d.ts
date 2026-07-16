@@ -1,4 +1,4 @@
-import { Hospital } from '../hospitals/entities/hospital.entity';
+import { Hospital } from '../../hospitals/entities/hospital.entity';
 export declare enum AmbulanceType {
     GROUND = "ground",
     AIR = "air"

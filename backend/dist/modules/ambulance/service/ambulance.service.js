@@ -8,13 +8,12 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.AmbulanceService = void 0;
 const common_1 = require("@nestjs/common");
-const ambulance_repository_1 = require("./repository/ambulance.repository");
+const ambulance_repository_1 = require("../repository/ambulance.repository");
+const ambulance_entity_1 = require("../entities/ambulance.entity");
 let AmbulanceService = class AmbulanceService {
-    ambulanceRepository;
     constructor(ambulanceRepository) {
         this.ambulanceRepository = ambulanceRepository;
     }
@@ -22,8 +21,8 @@ let AmbulanceService = class AmbulanceService {
         return this.ambulanceRepository.createAmbulance({
             licensePlate: dto.licensePlate,
             type: dto.type,
-            hospitalId: dto.hospitalId,
-            status: dto.status ?? 'available',
+            baseHospital: { id: dto.hospitalId },
+            status: dto.status ?? ambulance_entity_1.AmbulanceStatus.AVAILABLE,
             lastLatitude: dto.lastLatitude,
             lastLongitude: dto.lastLongitude,
             lastLocationUpdate: new Date(),
@@ -48,7 +47,7 @@ let AmbulanceService = class AmbulanceService {
         return this.ambulanceRepository.updateAmbulance(id, {
             licensePlate: dto.licensePlate,
             type: dto.type,
-            hospitalId: dto.hospitalId,
+            baseHospital: dto.hospitalId ? { id: dto.hospitalId } : undefined,
             status: dto.status,
             lastLatitude: dto.lastLatitude,
             lastLongitude: dto.lastLongitude,
@@ -72,6 +71,6 @@ let AmbulanceService = class AmbulanceService {
 exports.AmbulanceService = AmbulanceService;
 exports.AmbulanceService = AmbulanceService = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [typeof (_a = typeof ambulance_repository_1.AmbulanceRepository !== "undefined" && ambulance_repository_1.AmbulanceRepository) === "function" ? _a : Object])
+    __metadata("design:paramtypes", [ambulance_repository_1.AmbulanceRepository])
 ], AmbulanceService);
 //# sourceMappingURL=ambulance.service.js.map

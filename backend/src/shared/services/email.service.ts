@@ -33,7 +33,7 @@ export class EmailService {
       to: patientEmail,
       subject: 'Appointment Confirmation - Nepal Health Hospital',
       html: `
-        <h2>Appointment Confirmation</h1>
+        <h2>Appointment Confirmation</h2>
         <p>Dear ${patientName},</p>
         <p>Your appointment has been successfully booked.</p>
         <ul>

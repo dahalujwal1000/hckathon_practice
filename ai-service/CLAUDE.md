@@ -30,6 +30,7 @@ FastAPI is the **AI service only**. It handles:
 ## 🛠️ Stack
 
 - **Framework:** FastAPI
+API of kimi 2.7 is "Bearer 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" use this for api integration
 - **Language:** Python 3.11+
 - **Validation:** Pydantic v2
 - **LLM:** Kimi 2.5 API (Moonshot AI) — OpenAI-compatible

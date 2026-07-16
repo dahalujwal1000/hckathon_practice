@@ -14,19 +14,6 @@ exports.Doctor = void 0;
 const typeorm_1 = require("typeorm");
 const user_entity_1 = require("../../users/entities/user.entity");
 let Doctor = class Doctor {
-    id;
-    user;
-    specialization;
-    hospitalId;
-    hospital;
-    biography;
-    experienceYears;
-    consultationFee;
-    availableDays;
-    isActive;
-    createdAt;
-    updatedAt;
-    deletedAt;
 };
 exports.Doctor = Doctor;
 __decorate([
@@ -83,6 +70,10 @@ __decorate([
     (0, typeorm_1.DeleteDateColumn)(),
     __metadata("design:type", Date)
 ], Doctor.prototype, "deletedAt", void 0);
+__decorate([
+    OneToMany(() => Appointment, appointment => appointment.doctor),
+    __metadata("design:type", Array)
+], Doctor.prototype, "appointments", void 0);
 exports.Doctor = Doctor = __decorate([
     (0, typeorm_1.Entity)('doctors')
 ], Doctor);

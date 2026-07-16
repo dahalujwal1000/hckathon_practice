@@ -13,16 +13,6 @@ exports.UpdateHospitalDto = void 0;
 const class_validator_1 = require("class-validator");
 const hospital_entity_1 = require("../entities/hospital.entity");
 class UpdateHospitalDto {
-    name;
-    address;
-    latitude;
-    longitude;
-    phone;
-    website;
-    type;
-    rating;
-    establishedYear;
-    isActive;
 }
 exports.UpdateHospitalDto = UpdateHospitalDto;
 __decorate([

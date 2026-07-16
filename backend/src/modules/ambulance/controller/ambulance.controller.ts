@@ -11,13 +11,13 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { AmbulanceService } from './service/ambulance.service';
-import { CreateAmbulanceDto } from './dto/create-ambulance.dto';
-import { UpdateAmbulanceDto } from './dto/update-ambulance.dto';
-import { QueryAmbulanceDto } from './dto/query-ambulance.dto';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
-import { RolesGuard } from '../../common/guards/roles.guard';
-import { Roles } from '../../common/decorators/roles.decorator';
+import { AmbulanceService } from '../service/ambulance.service';
+import { CreateAmbulanceDto } from '../dto/create-ambulance.dto';
+import { UpdateAmbulanceDto } from '../dto/update-ambulance.dto';
+import { QueryAmbulanceDto } from '../dto/query-ambulance.dto';
+import { JwtAuthGuard } from 'common/guards/jwt-auth.guard';
+import { RolesGuard } from 'common/guards/roles.guard';
+import { Roles } from 'common/decorators/roles.decorator';
 import { UserRole } from '../../users/entities/user.entity';
 
 @Controller('ambulances')

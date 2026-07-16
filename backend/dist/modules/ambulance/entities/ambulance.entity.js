@@ -8,11 +8,10 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
-var _a;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Ambulance = exports.AmbulanceStatus = exports.AmbulanceType = void 0;
 const typeorm_1 = require("typeorm");
-const hospital_entity_1 = require("../hospitals/entities/hospital.entity");
+const hospital_entity_1 = require("../../hospitals/entities/hospital.entity");
 var AmbulanceType;
 (function (AmbulanceType) {
     AmbulanceType["GROUND"] = "ground";
@@ -25,18 +24,6 @@ var AmbulanceStatus;
     AmbulanceStatus["MAINTENANCE"] = "maintenance";
 })(AmbulanceStatus || (exports.AmbulanceStatus = AmbulanceStatus = {}));
 let Ambulance = class Ambulance {
-    id;
-    licensePlate;
-    type;
-    baseHospital;
-    status;
-    lastLatitude;
-    lastLongitude;
-    lastLocationUpdate;
-    isActive;
-    createdAt;
-    updatedAt;
-    deletedAt;
 };
 exports.Ambulance = Ambulance;
 __decorate([
@@ -54,7 +41,7 @@ __decorate([
 __decorate([
     (0, typeorm_1.ManyToOne)(() => hospital_entity_1.Hospital, hospital => hospital.ambulances),
     (0, typeorm_1.JoinColumn)({ name: 'hospital_id' }),
-    __metadata("design:type", typeof (_a = typeof hospital_entity_1.Hospital !== "undefined" && hospital_entity_1.Hospital) === "function" ? _a : Object)
+    __metadata("design:type", hospital_entity_1.Hospital)
 ], Ambulance.prototype, "baseHospital", void 0);
 __decorate([
     (0, typeorm_1.Column)({ type: 'enum', enum: AmbulanceStatus }),

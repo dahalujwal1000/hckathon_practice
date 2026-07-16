@@ -11,10 +11,10 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
-import { HospitalsService } from './service/hospitals.service';
-import { CreateHospitalDto } from './dto/create-hospital.dto';
-import { UpdateHospitalDto } from './dto/update-hospital.dto';
-import { QueryHospitalDto } from './dto/query-hospital.dto';
+import { HospitalsService } from '../service/hospitals.service';
+import { CreateHospitalDto } from '../dto/create-hospital.dto';
+import { UpdateHospitalDto } from '../dto/update-hospital.dto';
+import { QueryHospitalDto } from '../dto/query-hospital.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { Roles } from '../../common/decorators/roles.decorator';

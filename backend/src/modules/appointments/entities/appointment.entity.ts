@@ -68,7 +68,5 @@ export class Appointment {
   @DeleteDateColumn()
   deletedAt: Date;
 
-  // Exclude sensitive fields when transforming to JSON (e.g., for responses)
-  @Exclude()
-  // We don't have sensitive fields in appointment, but if we did, we'd mark them here.
+  // We don't have sensitive fields in appointment, but if we did, we'd mark them here with @Exclude()
 }

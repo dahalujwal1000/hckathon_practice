@@ -17,8 +17,6 @@ const passport_github2_1 = require("passport-github2");
 const config_1 = require("@nestjs/config");
 const auth_service_1 = require("./auth.service");
 let GithubStrategy = class GithubStrategy extends (0, passport_2.PassportStrategy)(passport_github2_1.Strategy, 'github') {
-    configService;
-    authService;
     constructor(configService, authService) {
         super({
             clientID: configService.get('GITHUB_CLIENT_ID'),

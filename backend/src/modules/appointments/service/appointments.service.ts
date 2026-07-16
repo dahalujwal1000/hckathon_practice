@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException, ForbiddenException, ConflictException } from '@nestjs/common';
-import { AppointmentsRepository } from './repository/appointments.repository';
-import { Appointment } from './entities/appointment.entity';
-import { CreateAppointmentDto } from './dto/create-appointment.dto';
-import { UpdateAppointmentDto } from './dto/update-appointment.dto';
-import { QueryAppointmentDto } from './dto/query-appointment.dto';
+import { AppointmentsRepository } from '../repository/appointments.repository';
+import { Appointment } from '../entities/appointment.entity';
+import { CreateAppointmentDto } from '../dto/create-appointment.dto';
+import { UpdateAppointmentDto } from '../dto/update-appointment.dto';
+import { QueryAppointmentDto } from '../dto/query-appointment.dto';
 import { User } from '../../users/entities/user.entity';
 import { UserRole } from '../../users/entities/user.entity';
+import { Doctor } from '../../doctors/entities/doctor.entity';
+import { Hospital } from '../../hospitals/entities/hospital.entity';
 import { DoctorsRepository } from '../../doctors/repository/doctors.repository';
 import { HospitalsRepository } from '../../hospitals/repository/hospitals.repository';
+import { UsersRepository } from '../../users/repository/users.repository';
+import { EmailService } from '../../../shared/services/email.service';
+import { EntityManager } from 'typeorm';
 
 @Injectable()
 export class AppointmentsService {
@@ -15,15 +20,14 @@ export class AppointmentsService {
     private readonly appointmentsRepository: AppointmentsRepository,
     private readonly doctorsRepository: DoctorsRepository,
     private readonly hospitalsRepository: HospitalsRepository,
+    private readonly usersRepository: UsersRepository,
+    private readonly emailService: EmailService,
   ) {}
 
   async getAppointments(
     queryDto: QueryAppointmentDto,
     currentUser: User,
   ): Promise<[Appointment[], number]> {
-    // Based on the user's role, we may need to filter the appointments
-    // For example, a patient should only see their own appointments.
-    // We'll let the repository handle the filtering by passing the current user.
     return this.appointmentsRepository.findAndPaginate(queryDto, currentUser);
   }
 
@@ -34,24 +38,11 @@ export class AppointmentsService {
     }
 
     // Check if the current user is authorized to view this appointment
-    const { patientId, doctorId } = appointment;
-    const isPatient = currentUser.id === patientId;
+    const isPatient = currentUser.id === appointment.patientId;
     let isDoctor = false;
     if (currentUser.role === UserRole.DOCTOR) {
-      // Check if the current user is the doctor for this appointment
-      const doctor = await this.doctorsRepository.findById(doctorId);
-      isDoctor = doctor && doctor.userId === currentUser.id; // Assuming doctor entity has a userId? Actually, doctor has a user relation.
-      // We'll need to adjust: the doctor entity has a user field. We'll check if the doctor's user id matches current user id.
-      // But we don't have the doctor entity loaded yet. We'll load it in the repository or here.
-      // For simplicity, we'll assume the doctor's userId is stored in the doctor entity? Actually, the doctor entity has a user relation.
-      // We'll do a quick check: if the current user is a doctor, we need to see if they are the doctor for this appointment.
-      // We'll fetch the doctor by its id and then check if the doctor's user id matches the current user's id.
-      // However, we already have the doctorId from the appointment. We can get the doctor and then check.
-      // Let's do it.
-      const doctorEntity = await this.doctorsRepository.findById(doctorId);
-      if (doctorEntity && doctorEntity.user && doctorEntity.user.id === currentUser.id) {
-        isDoctor = true;
-      }
+      const doctor = await this.doctorsRepository.findById(appointment.doctorId);
+      isDoctor = doctor && doctor.userId === currentUser.id;
     }
     const isAdmin = currentUser.role === UserRole.ADMIN;
 
@@ -85,20 +76,55 @@ export class AppointmentsService {
     // Authorization: who can create an appointment?
     // - Patient can create an appointment for themselves
     // - Admin can create an appointment for any patient
-    // - Doctor can create an appointment for their patients? We'll allow patient and admin for now.
     if (currentUser.role === UserRole.PATIENT && currentUser.id !== createDto.patientId) {
       throw new ForbiddenException('Patients can only create appointments for themselves');
     }
 
-    // Check for duplicate appointment? Not required for now.
+    // Use transaction to ensure consistency
+    return this.appointmentsRepository.manager.transaction(async (manager) => {
+      const appointmentRepo = manager.getRepository(Appointment);
+      const userRepo = manager.getRepository(User);
+      const doctorRepo = manager.getRepository(Doctor);
+      const hospitalRepo = manager.getRepository(Hospital);
 
-    return this.appointmentsRepository.createAppointment({
-      patientId: createDto.patientId,
-      doctorId: createDto.doctorId,
-      hospitalId: createDto.hospitalId,
-      appointmentDateTime: new Date(createDto.appointmentDateTime),
-      status: createDto.status || 'scheduled',
-      notes: createDto.notes,
+      // Create and save appointment
+      const appointment = appointmentRepo.create({
+        patientId: createDto.patientId,
+        doctorId: createDto.doctorId,
+        hospitalId: createDto.hospitalId,
+        appointmentDateTime: new Date(createDto.appointmentDateTime),
+        status: createDto.status || 'scheduled',
+        notes: createDto.notes,
+      });
+      const savedAppointment = await appointmentRepo.save(appointment);
+
+      // Fetch related data for email (within transaction)
+      const [patient, doctor, hospital] = await Promise.all([
+        userRepo.findOne({ where: { id: createDto.patientId } }),
+        doctorRepo.findOne({ where: { id: createDto.doctorId } }),
+        hospitalRepo.findOne({ where: { id: createDto.hospitalId } }),
+      ]);
+
+      // Send email (non-blocking) - if email fails we log but do not rollback transaction
+      if (patient && doctor && hospital) {
+        this.emailService
+          .sendAppointmentConfirmation(
+            patient.email,
+            patient.name,
+            {
+              doctorName: doctor.name,
+              hospitalName: hospital.name,
+              appointmentDateTime: savedAppointment.appointmentDateTime,
+              status: savedAppointment.status,
+              notes: savedAppointment.notes,
+            },
+          )
+          .catch((error) => {
+            console.error('Failed to send appointment confirmation email:', error);
+          });
+      }
+
+      return savedAppointment;
     });
   }
 
@@ -112,18 +138,12 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
     }
 
-    // Authorization: who can update this appointment?
-    const { patientId, doctorId } = appointment;
-    const isPatient = currentUser.id === patientId;
+    // Check if the current user is authorized to update this appointment
+    const isPatient = currentUser.id === appointment.patientId;
     let isDoctor = false;
     if (currentUser.role === UserRole.DOCTOR) {
-      const doctor = await this.doctorsRepository.findById(doctorId);
-      isDoctor = doctor && doctor.userId === currentUser.id; // Again, we need to check the doctor's user.
-      // Let's do it properly.
-      const doctorEntity = await this.doctorsRepository.findById(doctorId);
-      if (doctorEntity && doctorEntity.user && doctorEntity.user.id === currentUser.id) {
-        isDoctor = true;
-      }
+      const doctor = await this.doctorsRepository.findById(appointment.doctorId);
+      isDoctor = doctor && doctor.userId === currentUser.id;
     }
     const isAdmin = currentUser.role === UserRole.ADMIN;
 
@@ -148,7 +168,7 @@ export class AppointmentsService {
     // Update the appointment
     const updateData: any = {};
     if (updateDto.patientId !== undefined) {
-      // Only allow patientId to be changed by admin? We'll restrict: only admin can change patientId.
+      // Only allow patientId to be changed by admin
       if (currentUser.role !== UserRole.ADMIN) {
         throw new ForbiddenException('Only administrators can change the patient for an appointment');
       }
@@ -184,18 +204,12 @@ export class AppointmentsService {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
     }
 
-    // Authorization: who can cancel this appointment?
-    const { patientId, doctorId } = appointment;
-    const isPatient = currentUser.id === patientId;
+    // Check if the current user is authorized to cancel this appointment
+    const isPatient = currentUser.id === appointment.patientId;
     let isDoctor = false;
     if (currentUser.role === UserRole.DOCTOR) {
-      const doctor = await this.doctorsRepository.findById(doctorId);
+      const doctor = await this.doctorsRepository.findById(appointment.doctorId);
       isDoctor = doctor && doctor.userId === currentUser.id;
-      // Let's do it properly.
-      const doctorEntity = await this.doctorsRepository.findById(doctorId);
-      if (doctorEntity && doctorEntity.user && doctorEntity.user.id === currentUser.id) {
-        isDoctor = true;
-      }
     }
     const isAdmin = currentUser.role === UserRole.ADMIN;
 
@@ -210,21 +224,30 @@ export class AppointmentsService {
     patientId: string,
     currentUser: User,
   ): Promise<Appointment[]> {
-    // Authorization: patient can view their own, admin can view any, doctor can view their patients' appointments?
+    // Authorization: patient can view their own, admin can view any, doctor can view appointments where they are the doctor for that patient?
+    // Actually, the requirement: doctor can view appointments where they are the doctor.
+    // So for the endpoint GET /appointments/patient/:patientId, a doctor should only be able to see
+    // the appointments for that patient where they are the doctor.
     const isPatient = currentUser.id === patientId;
     const isAdmin = currentUser.role === UserRole.ADMIN;
-    let isDoctor = false;
-    if (currentUser.role === UserRole.DOCTOR) {
-      // Check if the doctor has any appointments with this patient? Actually, we want to allow doctors to see appointments for their patients.
-      // We'll let the repository handle it by checking if the doctor is the doctor for the appointment.
-      // For simplicity, we'll allow doctors to see appointments where they are the doctor.
-      // We'll do the check in the repository query.
-    }
-    if (!isPatient && !isAdmin && !isDoctor) {
+
+    if (!isPatient && !isAdmin && currentUser.role !== UserRole.DOCTOR) {
       throw new ForbiddenException('You do not have permission to view these appointments');
     }
 
-    return this.appointmentsRepository.findByPatientId(patientId);
+    let appointments = await this.appointmentsRepository.findByPatientId(patientId);
+
+    // If the current user is a doctor, filter to only appointments where they are the doctor
+    if (currentUser.role === UserRole.DOCTOR && !isPatient && !isAdmin) {
+      appointments = await Promise.all(
+        appointments.map(async (appointment) => {
+          const doctor = await this.doctorsRepository.findById(appointment.doctorId);
+          return doctor && doctor.userId === currentUser.id ? appointment : null;
+        }),
+      ).then((results) => results.filter((appt): appt is Appointment => appt !== null));
+    }
+
+    return appointments;
   }
 
   async getAppointmentsByDoctor(
@@ -232,18 +255,10 @@ export class AppointmentsService {
     currentUser: User,
   ): Promise<Appointment[]> {
     // Authorization: doctor can view their own appointments, admin can view any
-    const isDoctor = currentUser.id === doctorId; // Wait, doctorId is the doctor's id, not the user's id.
-    // We need to check if the current user is the doctor for this doctorId.
-    // Let's get the doctor entity and see if its user matches the current user.
-    const doctorEntity = await this.doctorsRepository.findById(doctorId);
-    if (doctorEntity && doctorEntity.user && doctorEntity.user.id === currentUser.id) {
-      // The current user is the doctor for this doctorId
-    } else {
-      // Not the doctor
-    }
+    const isDoctor = await this.isDoctorForDoctorId(doctorId, currentUser);
     const isAdmin = currentUser.role === UserRole.ADMIN;
 
-    if (!(doctorEntity && doctorEntity.user && doctorEntity.user.id === currentUser.id) && !isAdmin) {
+    if (!isDoctor && !isAdmin) {
       throw new ForbiddenException('You do not have permission to view these appointments');
     }
 
@@ -254,30 +269,15 @@ export class AppointmentsService {
     hospitalId: string,
     currentUser: User,
   ): Promise<Appointment[]> {
-    // Authorization: admin can view any hospital's appointments, maybe doctors and patients can view theirs?
-    // We'll allow admin and let the repository handle filtering by hospital and then check appointment ownership.
-    const isAdmin = currentUser.role === UserRole.ADMIN;
-    if (!isAdmin) {
-      // For non-admin, we'll fetch the appointments and then filter by user role in the repository or service.
-      // We'll let the repository handle it by passing the current user and letting it filter.
-      return this.appointmentsRepository.findByHospitalId(hospitalId, currentUser);
-    }
-    return this.appointmentsRepository.findByHospitalId(hospitalId);
+    // Authorization: admin can view any hospital's appointments,
+    // doctors can view appointments where they are the doctor in that hospital,
+    // patients can view their own appointments in that hospital.
+    return this.appointmentsRepository.findByHospitalId(hospitalId, currentUser);
   }
 
   private async validatePatient(patientId: string): Promise<boolean> {
-    // We'll check if the patient exists in the users table and has role patient
-    // We don't have a users repository injected, but we can use the appointments repository? Or we can inject the users repository.
-    // For simplicity, we'll assume that if the patientId exists in the users table and the role is patient, it's valid.
-    // We'll need to inject the users repository. Let's do it.
-    // But to avoid changing the constructor too much, we'll do a simple check: we'll assume the patientId is valid if it's not empty.
-    // Actually, we should check. Let's inject the users repository.
-    // We'll modify the constructor to include UsersRepository.
-    // However, we don't want to change the constructor now. Let's do a quick check by using the appointments repository? It doesn't have a method to check user.
-    // We'll leave it as a TODO for now and return true if the patientId is not empty.
-    // This is not ideal, but for the sake of moving forward, we'll assume the validation is done elsewhere.
-    // We'll return true if the patientId is a non-empty string.
-    return !!patientId && patientId.trim() !== '';
+    const patient = await this.usersRepository.findById(patientId);
+    return !!patient && patient.role === UserRole.PATIENT;
   }
 
   private async validateDoctor(doctorId: string): Promise<boolean> {
@@ -288,5 +288,13 @@ export class AppointmentsService {
   private async validateHospital(hospitalId: string): Promise<boolean> {
     const hospital = await this.hospitalsRepository.findById(hospitalId);
     return !!hospital;
+  }
+
+  private async isDoctorForDoctorId(doctorId: string, currentUser: User): Promise<boolean> {
+    if (currentUser.role !== UserRole.DOCTOR) {
+      return false;
+    }
+    const doctor = await this.doctorsRepository.findById(doctorId);
+    return !!doctor && doctor.userId === currentUser.id;
   }
 }

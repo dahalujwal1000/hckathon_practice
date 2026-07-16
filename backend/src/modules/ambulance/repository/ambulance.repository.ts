@@ -27,7 +27,7 @@ export class AmbulanceRepository {
       qb.andWhere('ambulance.status = :status', { status });
     }
     if (hospitalId) {
-      qb.andWhere('ambulance.hospitalId = :hospitalId', { hospitalId });
+      qb.andWhere('ambulance.hospital_id = :hospitalId', { hospitalId });
     }
 
     const [data, total] = await qb
@@ -58,7 +58,7 @@ export class AmbulanceRepository {
   }
 
   async findByHospitalId(hospitalId: string): Promise<Ambulance[]> {
-    return this.repository.find({ where: { hospitalId } });
+    return this.repository.find({ where: { baseHospital: { id: hospitalId } } });
   }
 
   async findNearby(

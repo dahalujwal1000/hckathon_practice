@@ -1,24 +1,26 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { AmbulanceRepository } from './repository/ambulance.repository';
+import { AmbulanceRepository } from '../repository/ambulance.repository';
 import { Ambulance } from '../entities/ambulance.entity';
 import { CreateAmbulanceDto } from '../dto/create-ambulance.dto';
 import { UpdateAmbulanceDto } from '../dto/update-ambulance.dto';
 import { QueryAmbulanceDto } from '../dto/query-ambulance.dto';
+import { AmbulanceStatus } from '../entities/ambulance.entity';
+import { Hospital } from '../../hospitals/entities/hospital.entity';
 
 @Injectable()
 export class AmbulanceService {
   constructor(private readonly ambulanceRepository: AmbulanceRepository) {}
 
-  async createAmbulance(dto: CreateAmbulanceDto): Promise<Ambulance> {
+  async createAmbulance(createDto: CreateAmbulanceDto): Promise<Ambulance> {
     return this.ambulanceRepository.createAmbulance({
-      licensePlate: dto.licensePlate,
-      type: dto.type,
-      hospitalId: dto.hospitalId,
-      status: dto.status ?? 'available',
-      lastLatitude: dto.lastLatitude,
-      lastLongitude: dto.lastLongitude,
+      licensePlate: createDto.licensePlate,
+      type: createDto.type,
+      baseHospital: { id: createDto.hospitalId } as Hospital,
+      status: createDto.status ?? AmbulanceStatus.AVAILABLE,
+      lastLatitude: createDto.lastLatitude,
+      lastLongitude: createDto.lastLongitude,
       lastLocationUpdate: new Date(),
-      isActive: dto.isActive ?? true,
+      isActive: createDto.isActive ?? true,
     });
   }
 
@@ -34,20 +36,20 @@ export class AmbulanceService {
     return ambulance;
   }
 
-  async updateAmbulance(id: string, dto: UpdateAmbulanceDto): Promise<Ambulance> {
+  async updateAmbulance(id: string, updateDto: UpdateAmbulanceDto): Promise<Ambulance> {
     const exists = await this.ambulanceRepository.findById(id);
     if (!exists) {
       throw new NotFoundException(`Ambulance with ID ${id} not found`);
     }
     return this.ambulanceRepository.updateAmbulance(id, {
-      licensePlate: dto.licensePlate,
-      type: dto.type,
-      hospitalId: dto.hospitalId,
-      status: dto.status,
-      lastLatitude: dto.lastLatitude,
-      lastLongitude: dto.lastLongitude,
+      licensePlate: updateDto.licensePlate,
+      type: updateDto.type,
+      baseHospital: updateDto.hospitalId ? { id: updateDto.hospitalId } as Hospital : undefined,
+      status: updateDto.status,
+      lastLatitude: updateDto.lastLatitude,
+      lastLongitude: updateDto.lastLongitude,
       // we don't update lastLocationUpdate automatically here; could be set by another service
-      isActive: dto.isActive,
+      isActive: updateDto.isActive,
     });
   }
 

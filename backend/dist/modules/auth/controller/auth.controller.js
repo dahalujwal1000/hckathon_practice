@@ -20,8 +20,6 @@ const config_1 = require("@nestjs/config");
 const passport_1 = require("@nestjs/passport");
 const jwt_auth_guard_1 = require("../guards/jwt-auth.guard");
 let AuthController = class AuthController {
-    authService;
-    configService;
     constructor(authService, configService) {
         this.authService = authService;
         this.configService = configService;

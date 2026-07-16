@@ -10,8 +10,11 @@ import { UsersModule } from './modules/users/users.module';
 import { DoctorsModule } from './modules/doctors/doctors.module';
 import { HospitalsModule } from './modules/hospitals/hospitals.module';
 import { AmbulanceModule } from './modules/ambulance/ambulance.module';
+import { AppointmentsModule } from './modules/appointments/appointments.module';
+import { AiModule } from './modules/ai/ai.module';
 import { SharedModule } from './shared/shared.module';
 import { AppDataSource } from './database/data-source';
+import { AiModule } from './modules/ai/ai.module';
 
 @Module({
   imports: [
@@ -40,6 +43,9 @@ import { AppDataSource } from './database/data-source';
     DoctorsModule,
     HospitalsModule,
     AmbulanceModule,
+    AppointmentsModule,
+    AiModule,
+    AiModule,
     SharedModule,
   ],
   controllers: [AppController],
